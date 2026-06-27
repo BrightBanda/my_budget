@@ -26,7 +26,7 @@ class GoalCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.cardBorder),
+        //border: Border.all(color: AppColors.cardBorder),
       ),
       child: Column(
         children: [

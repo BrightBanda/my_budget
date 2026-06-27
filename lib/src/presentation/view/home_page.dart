@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/utils/add_button.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
 import 'package:my_budget/src/utils/balance_summary_card.dart';
 import 'package:my_budget/src/utils/goal_card.dart';
@@ -21,6 +22,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         title: Text("MYGOAL", style: TextStyle(fontWeight: FontWeight.w700)),
         backgroundColor: AppColors.appBar,
         foregroundColor: Colors.white,
+        actions: [AddButton(title: "+ Add")],
       ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
@@ -39,7 +41,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ElevatedButton(onPressed: () {}, child: Text("Goals")),
                     ElevatedButton(
                       onPressed: () {},
-                      child: Text("Transactions"),
+                      child: Text("BudgetTransactions"),
                     ),
                     ElevatedButton(onPressed: () {}, child: Text("Analytics")),
                   ],
