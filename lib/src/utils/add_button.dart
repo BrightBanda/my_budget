@@ -3,7 +3,8 @@ import 'package:my_budget/src/utils/app_colors.dart';
 
 class AddButton extends StatelessWidget {
   final String title;
-  const AddButton({super.key, required this.title});
+  final void Function()? onPressed;
+  const AddButton({super.key, required this.title, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,7 @@ class AddButton extends StatelessWidget {
         color: AppColors.primary,
         borderRadius: BorderRadiusDirectional.circular(40),
       ),
-      child: MaterialButton(onPressed: () {}, child: Text(title)),
+      child: MaterialButton(onPressed: onPressed, child: Text(title)),
     );
   }
 }
