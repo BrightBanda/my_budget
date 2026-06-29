@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/presentation/view/transactions_page.dart';
 import 'package:my_budget/src/providers/balance_provider.dart';
 import 'package:my_budget/src/utils/add_button.dart';
 import 'package:my_budget/src/utils/add_transaction_sheet.dart';
@@ -52,7 +53,17 @@ class _HomePageState extends ConsumerState<HomePage> {
                 child: Row(
                   spacing: 6,
                   children: [
-                    ElevatedButton(onPressed: () {}, child: Text("Dashboard")),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (builder) => TransactionsPage(),
+                          ),
+                        );
+                      },
+                      child: Text("Dashboard"),
+                    ),
                     ElevatedButton(onPressed: () {}, child: Text("Goals")),
                     ElevatedButton(
                       onPressed: () {},

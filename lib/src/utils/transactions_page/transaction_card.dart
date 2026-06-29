@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_budget/src/data/models/transaction.dart';
+import 'package:my_budget/src/providers/transaction_provider.dart';
+import 'package:my_budget/src/utils/app_dialog.dart';
 import 'package:my_budget/src/utils/transactions_page/transaction_amount_widget.dart';
 import 'package:my_budget/src/utils/transactions_page/transaction_icon.dart';
 
-class TransactionCard extends StatelessWidget {
+class TransactionCard extends ConsumerWidget {
   final BudgetTransaction transaction;
+  final void Function()? onDeletePressed;
 
-  const TransactionCard({super.key, required this.transaction});
+  const TransactionCard({
+    super.key,
+    required this.transaction,
+    required this.onDeletePressed,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final income = transaction.type == 'income';
 
     return Container(
@@ -60,6 +68,12 @@ class TransactionCard extends StatelessWidget {
           ),
 
           TransactionAmountWidget(amount: transaction.amount, isIncome: income),
+          SizedBox(width: 15),
+          IconButton(
+            icon: Icon(Icons.delete),
+            color: Colors.red,
+            onPressed: onDeletePressed,
+          ),
         ],
       ),
     );

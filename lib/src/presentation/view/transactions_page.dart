@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/presentation/view/home_page.dart';
 import 'package:my_budget/src/utils/transactions_page/transaction_filter_chip.dart';
 import 'package:my_budget/src/utils/transactions_page/transaction_list.dart';
 
@@ -19,29 +20,38 @@ class TransactionsPage extends ConsumerWidget {
           const SizedBox(height: 20),
 
           //const TransactionFiltersRow(),
-          Row(
-            children: [
-              TransactionFilterChip(
-                label: "Bank",
-                selected: true,
-                onTap: () {},
-              ),
-              TransactionFilterChip(
-                label: "Airtel Money",
-                selected: false,
-                onTap: () {},
-              ),
-              TransactionFilterChip(
-                label: "TNM Mpamba",
-                selected: false,
-                onTap: () {},
-              ),
-              TransactionFilterChip(
-                label: "Cash",
-                selected: false,
-                onTap: () {},
-              ),
-            ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              spacing: 12,
+              children: [
+                TransactionFilterChip(
+                  label: "Bank",
+                  selected: true,
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (builder) => HomePage()),
+                    );
+                  },
+                ),
+                TransactionFilterChip(
+                  label: "Airtel Money",
+                  selected: false,
+                  onTap: () {},
+                ),
+                TransactionFilterChip(
+                  label: "TNM Mpamba",
+                  selected: false,
+                  onTap: () {},
+                ),
+                TransactionFilterChip(
+                  label: "Cash",
+                  selected: false,
+                  onTap: () {},
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(height: 20),

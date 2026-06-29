@@ -24,8 +24,9 @@ class TransactionsNotifier extends AsyncNotifier<List<BudgetTransaction>> {
 
   Future<void> deleteTransaction(String id) async {
     await _db.deleteTransaction(id);
+    final updated = await _db.getTransactions();
 
-    ref.invalidateSelf();
+    state = AsyncData(updated);
   }
 
   Future<void> updateTransaction(BudgetTransaction transaction) async {
