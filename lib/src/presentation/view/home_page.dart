@@ -6,6 +6,7 @@ import 'package:my_budget/src/utils/add_transaction_sheet.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
 import 'package:my_budget/src/utils/balance_summary_card.dart';
 import 'package:my_budget/src/utils/goal_card.dart';
+import 'package:my_budget/src/utils/label.dart';
 import 'package:my_budget/src/utils/statistics_card.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -65,6 +66,9 @@ class _HomePageState extends ConsumerState<HomePage> {
               //balance summary sheet
               BalanceCard(balance: ref.watch(balanceProvider).toString()),
 
+              //summary
+              Label(text: "Summary", fontSize: 16, fontWeight: FontWeight.w700),
+
               GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -76,26 +80,26 @@ class _HomePageState extends ConsumerState<HomePage> {
                   StatsCard(
                     title: "Savings rate",
                     value: "59%",
-                    subtitle: "subtitle",
+                    subtitle: "of income saved",
                   ),
                   StatsCard(
-                    title: "Savings rate",
-                    value: "59%",
-                    subtitle: "subtitle",
+                    title: "AVG/Day",
+                    value: "MK 8500",
+                    subtitle: "daily spend",
                   ),
                   StatsCard(
-                    title: "Savings rate",
-                    value: "59%",
-                    subtitle: "subtitle",
+                    title: "Transactions",
+                    value: "120",
+                    subtitle: "total recorded",
                   ),
                   StatsCard(
-                    title: "Savings rate",
-                    value: "59%",
-                    subtitle: "subtitle",
+                    title: "Goals",
+                    value: "2",
+                    subtitle: "0 completed",
                   ),
                 ],
               ),
-
+              Label(text: "Goals", fontSize: 16, fontWeight: FontWeight.w700),
               Column(
                 children: const [
                   GoalCard(
@@ -118,6 +122,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                     funded: "21% funded",
                   ),
                 ],
+              ),
+
+              //recent transactions
+              Label(
+                text: "Recent activity",
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
               ),
             ],
           ),

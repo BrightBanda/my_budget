@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
 class BudgetTransaction {
   final String id;
   final double amount;
@@ -36,4 +39,10 @@ class BudgetTransaction {
       'date': date.toIso8601String(),
     };
   }
+}
+
+extension TransactionUI on BudgetTransaction {
+  bool get isIncome => type == 'income';
+
+  Color get amountColor => isIncome ? Colors.greenAccent : Colors.redAccent;
 }

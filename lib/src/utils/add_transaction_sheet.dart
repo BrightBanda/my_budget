@@ -5,6 +5,7 @@ import 'package:my_budget/src/providers/balance_provider.dart';
 import 'package:my_budget/src/providers/total_expense_provider.dart';
 import 'package:my_budget/src/providers/total_income_provider.dart';
 import 'package:my_budget/src/providers/transaction_provider.dart';
+import 'package:my_budget/src/utils/label.dart';
 import 'package:my_budget/src/utils/transaction_sheet/category_selector.dart';
 import 'package:my_budget/src/utils/transaction_sheet/date_picker.dart';
 import 'package:my_budget/src/utils/transaction_sheet/transaction_type_toggle.dart';
@@ -23,7 +24,8 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   String selectedCategory = 'Food';
   String selectedProvider = 'Airtel Money';
 
-  final categories = ['Food', 'Transport', 'Rent', 'Data', 'Other'];
+  final expenseCategories = ['Food', 'Transport', 'Rent', 'Data', 'Other'];
+  final incomeCategories = ["Salary", "Pocket Money", "Business", "other"];
 
   final amountController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -81,7 +83,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
 
               const SizedBox(height: 20),
 
-              _label('AMOUNT (MWK)'),
+              Label(text: 'AMOUNT (MWK)'),
 
               const SizedBox(height: 8),
 
@@ -93,7 +95,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
 
               const SizedBox(height: 16),
 
-              _label('DESCRIPTION'),
+              Label(text: 'DESCRIPTION'),
 
               const SizedBox(height: 8),
 
@@ -104,13 +106,13 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
 
               const SizedBox(height: 16),
 
-              _label('CATEGORY'),
+              Label(text: 'CATEGORY'),
 
               const SizedBox(height: 12),
 
               //category selector
               CategorySelector(
-                categories: categories,
+                categories: isExpense ? expenseCategories : incomeCategories,
                 selectedCategory: selectedCategory,
                 onSelected: (category) {
                   setState(() {
@@ -121,7 +123,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
 
               const SizedBox(height: 16),
 
-              _label('PROVIDER'),
+              Label(text: 'PROVIDER'),
 
               const SizedBox(height: 8),
 
@@ -150,7 +152,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
 
               const SizedBox(height: 16),
 
-              _label('DATE'),
+              Label(text: 'DATE'),
 
               const SizedBox(height: 8),
 
@@ -209,16 +211,16 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     );
   }
 
-  Widget _label(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        color: Color(0xFF8B8BB5),
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
+  // Widget _label(String text) {
+  //   return Text(
+  //     text,
+  //     style: const TextStyle(
+  //       color: Color(0xFF8B8BB5),
+  //       fontSize: 12,
+  //       fontWeight: FontWeight.w600,
+  //     ),
+  //   );
+  // }
 
   Widget _textField({
     required TextEditingController controller,
