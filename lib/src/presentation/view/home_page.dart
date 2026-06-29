@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/providers/balance_provider.dart';
 import 'package:my_budget/src/utils/add_button.dart';
 import 'package:my_budget/src/utils/add_transaction_sheet.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
@@ -61,7 +62,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
               ),
 
-              BalanceCard(),
+              //balance summary sheet
+              BalanceCard(balance: ref.watch(balanceProvider).toString()),
 
               GridView.count(
                 shrinkWrap: true,

@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/data/models/transaction.dart';
+import 'package:my_budget/src/providers/balance_provider.dart';
+import 'package:my_budget/src/providers/total_expense_provider.dart';
+import 'package:my_budget/src/providers/total_income_provider.dart';
+import 'package:my_budget/src/providers/transaction_provider.dart';
+import 'package:my_budget/src/utils/transaction_sheet/category_selector.dart';
+import 'package:my_budget/src/utils/transaction_sheet/date_picker.dart';
+import 'package:my_budget/src/utils/transaction_sheet/transaction_type_toggle.dart';
 
-class AddTransactionSheet extends StatefulWidget {
+class AddTransactionSheet extends ConsumerStatefulWidget {
   const AddTransactionSheet({super.key});
 
   @override
-  State<AddTransactionSheet> createState() => _AddTransactionSheetState();
+  ConsumerState<AddTransactionSheet> createState() =>
+      _AddTransactionSheetState();
 }
 
-class _AddTransactionSheetState extends State<AddTransactionSheet> {
+class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   bool isExpense = true;
 
   String selectedCategory = 'Food';
@@ -61,66 +71,12 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
 
               const SizedBox(height: 16),
 
-              /// Expense / Income
-              Container(
-                height: 48,
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF252555),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() => isExpense = true);
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isExpense
-                                ? const Color(0xFFFF0055)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'Expense',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() => isExpense = false);
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: !isExpense
-                                ? const Color(0xFFFF0055)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'Income',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              //expense and incom toggles
+              TransactionTypeToggle(
+                isExpense: isExpense,
+                onChanged: (value) => setState(() {
+                  isExpense = value;
+                }),
               ),
 
               const SizedBox(height: 20),
@@ -132,7 +88,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               _textField(
                 controller: amountController,
                 hint: '0',
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
               ),
 
               const SizedBox(height: 16),
@@ -152,40 +108,15 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
 
               const SizedBox(height: 12),
 
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: categories.map((category) {
-                  final selected = selectedCategory == category;
-
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedCategory = category;
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? const Color(0xFFFFB800)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFF34346D)),
-                      ),
-                      child: Text(
-                        category,
-                        style: TextStyle(
-                          color: selected ? Colors.white : Color(0xFF8B8BB5),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+              //category selector
+              CategorySelector(
+                categories: categories,
+                selectedCategory: selectedCategory,
+                onSelected: (category) {
+                  setState(() {
+                    selectedCategory = category;
+                  });
+                },
               ),
 
               const SizedBox(height: 16),
@@ -195,7 +126,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               const SizedBox(height: 8),
 
               DropdownButtonFormField<String>(
-                value: selectedProvider,
+                initialValue: selectedProvider,
                 dropdownColor: const Color(0xFF252555),
                 style: const TextStyle(color: Colors.white),
                 decoration: _inputDecoration(),
@@ -223,55 +154,37 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
 
               const SizedBox(height: 8),
 
-              InkWell(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2100),
-                    initialDate: selectedDate,
-                  );
-
-                  if (picked != null) {
-                    setState(() {
-                      selectedDate = picked;
-                    });
-                  }
-                },
-                child: Container(
-                  height: 54,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF252555),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${selectedDate.day.toString().padLeft(2, '0')}/'
-                          '${selectedDate.month.toString().padLeft(2, '0')}/'
-                          '${selectedDate.year}',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      const Icon(
-                        Icons.calendar_today_outlined,
-                        size: 18,
-                        color: Colors.white70,
-                      ),
-                    ],
-                  ),
-                ),
+              //Date picker
+              DatePicker(
+                date: selectedDate,
+                onChanged: (date) => setState(() {
+                  selectedDate = date;
+                }),
               ),
 
               const SizedBox(height: 24),
 
+              //save TRansaction button
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final amount = double.parse(amountController.text);
+                    final transaction = BudgetTransaction(
+                      amount: amount,
+                      date: selectedDate,
+                      title: descriptionController.text,
+                      type: isExpense ? "expense" : "income",
+                      category: selectedCategory,
+                      id: DateTime.now().toIso8601String(),
+                    );
+                    await ref
+                        .read(transactionsProvider.notifier)
+                        .addTransaction(transaction);
+                    print(selectedCategory);
+                    Navigator.pop(context);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF00D084),
                     elevation: 0,
@@ -281,7 +194,11 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                   ),
                   child: const Text(
                     'Save Transaction',
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

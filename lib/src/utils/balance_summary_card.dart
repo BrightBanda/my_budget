@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class BalanceCard extends StatelessWidget {
-  const BalanceCard({super.key});
+  final String balance;
+  const BalanceCard({super.key, required this.balance});
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +31,8 @@ class BalanceCard extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          const Text(
-            "MWK 106,500",
+          Text(
+            "MK $balance",
             style: TextStyle(
               color: Colors.white,
               fontSize: 38,
@@ -47,7 +48,7 @@ class BalanceCard extends StatelessWidget {
               _statItem(
                 Icon(Icons.trending_up, color: Colors.white),
                 "Income",
-                "MWK 180,000",
+                "MWK 180,001",
               ),
               _statItem(
                 Icon(Icons.trending_down, color: Colors.white),

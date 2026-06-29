@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_budget/src/data/models/transaction.dart';
 import 'package:my_budget/src/data/services/database_service.dart';
+import 'package:my_budget/src/providers/balance_provider.dart';
 import 'package:my_budget/src/providers/database_service_provider.dart';
 
 class TransactionsNotifier extends AsyncNotifier<List<BudgetTransaction>> {
@@ -16,7 +17,9 @@ class TransactionsNotifier extends AsyncNotifier<List<BudgetTransaction>> {
   Future<void> addTransaction(BudgetTransaction transaction) async {
     await _db.insertTransaction(transaction);
 
-    ref.invalidateSelf();
+    final updated = await _db.getTransactions();
+
+    state = AsyncData(updated);
   }
 
   Future<void> deleteTransaction(String id) async {
