@@ -21,6 +21,7 @@ class TransactionsPage extends ConsumerWidget {
 
           //const TransactionFiltersRow(),
           SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 12),
             scrollDirection: Axis.horizontal,
             child: Row(
               spacing: 12,

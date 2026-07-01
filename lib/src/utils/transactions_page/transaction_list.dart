@@ -5,7 +5,13 @@ import 'package:my_budget/src/utils/app_dialog.dart';
 import 'package:my_budget/src/utils/transactions_page/transaction_card.dart';
 
 class TransactionsList extends ConsumerWidget {
-  const TransactionsList({super.key});
+  final bool isMainList;
+  final int itemCount;
+  const TransactionsList({
+    super.key,
+    this.isMainList = true,
+    this.itemCount = 0,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,7 +24,9 @@ class TransactionsList extends ConsumerWidget {
 
       data: (items) {
         return ListView.builder(
-          itemCount: items.length,
+          shrinkWrap: true,
+          itemCount: isMainList ? items.length : itemCount,
+
           itemBuilder: (context, index) {
             final transaction = items[index];
             return TransactionCard(
