@@ -1,41 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:my_budget/src/data/models/transaction.dart';
-import 'package:my_budget/src/providers/transaction_provider.dart';
+import 'package:my_budget/src/data/models/savings_goal.dart';
+import 'package:my_budget/src/providers/goals_provider.dart';
 import 'package:my_budget/src/utils/label.dart';
-import 'package:my_budget/src/utils/transaction_sheet/category_selector.dart';
 import 'package:my_budget/src/utils/transaction_sheet/date_picker.dart';
-import 'package:my_budget/src/utils/transaction_sheet/transaction_type_toggle.dart';
 
-class AddTransactionSheet extends ConsumerStatefulWidget {
-  const AddTransactionSheet({super.key});
+class AddGoalSheet extends ConsumerStatefulWidget {
+  const AddGoalSheet({super.key});
 
   @override
-  ConsumerState<AddTransactionSheet> createState() =>
-      _AddTransactionSheetState();
+  ConsumerState<AddGoalSheet> createState() => _AddGoalSheetState();
 }
 
-class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
-  bool isExpense = true;
+class _AddGoalSheetState extends ConsumerState<AddGoalSheet> {
+  final titleController = TextEditingController();
+  final targetAmountController = TextEditingController();
+  final currentAmountController = TextEditingController();
 
-  String selectedCategory = 'Food';
-  String selectedProvider = 'Airtel Money';
+  DateTime dueDate = DateTime.now().add(const Duration(days: 30));
 
-  final expenseCategories = [
-    'Food',
-    'Transport',
-    'Medics',
-    'Rent',
-    'Internet',
-    'Fees',
+  String selectedCategory = 'Electronics';
+
+  final categories = [
+    'Electronics',
+    'Travel',
+    'Car',
+    'House',
+    'Education',
+    'Emergency',
     'Other',
   ];
-  final incomeCategories = ["Salary", "Pocket Money", "Business", "other"];
-
-  final amountController = TextEditingController();
-  final descriptionController = TextEditingController();
-
-  DateTime selectedDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -56,12 +50,12 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Header
+              /// HEADER
               Row(
                 children: [
                   const Expanded(
                     child: Text(
-                      'Add Transaction',
+                      'Create Goal',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 22,
@@ -76,135 +70,111 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                 ],
               ),
 
-              const SizedBox(height: 16),
-
-              //expense and incom toggles
-              TransactionTypeToggle(
-                isExpense: isExpense,
-                onChanged: (value) => setState(() {
-                  isExpense = value;
-                }),
-              ),
-
               const SizedBox(height: 20),
 
-              Label(text: 'AMOUNT (MWK)'),
+              Label(text: 'GOAL TITLE'),
+
+              const SizedBox(height: 8),
+
+              _textField(controller: titleController, hint: 'New Laptop'),
+
+              const SizedBox(height: 16),
+
+              Label(text: 'TARGET AMOUNT'),
 
               const SizedBox(height: 8),
 
               _textField(
-                controller: amountController,
-                hint: '0',
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                controller: targetAmountController,
+                hint: '350000',
+                keyboardType: TextInputType.number,
               ),
 
               const SizedBox(height: 16),
 
-              Label(text: 'DESCRIPTION'),
+              Label(text: 'CURRENT AMOUNT'),
 
               const SizedBox(height: 8),
 
               _textField(
-                controller: descriptionController,
-                hint: 'What was this for?',
+                controller: currentAmountController,
+                hint: '0',
+                keyboardType: TextInputType.number,
               ),
 
               const SizedBox(height: 16),
 
               Label(text: 'CATEGORY'),
 
-              const SizedBox(height: 12),
-
-              //category selector
-              CategorySelector(
-                categories: isExpense ? expenseCategories : incomeCategories,
-                selectedCategory: selectedCategory,
-                onSelected: (category) {
-                  setState(() {
-                    selectedCategory = category;
-                  });
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              Label(text: 'PROVIDER'),
-
               const SizedBox(height: 8),
 
               DropdownButtonFormField<String>(
-                initialValue: selectedProvider,
+                initialValue: selectedCategory,
                 dropdownColor: const Color(0xFF252555),
                 style: const TextStyle(color: Colors.white),
                 decoration: _inputDecoration(),
-                items: const [
-                  DropdownMenuItem(
-                    value: 'Airtel Money',
-                    child: Text('Airtel Money'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'TNM Mpamba',
-                    child: Text('TNM Mpamba'),
-                  ),
-                  DropdownMenuItem(value: 'Cash', child: Text('Cash')),
-                ],
+                items: categories.map((category) {
+                  return DropdownMenuItem(
+                    value: category,
+                    child: Text(category),
+                  );
+                }).toList(),
                 onChanged: (value) {
                   setState(() {
-                    selectedProvider = value!;
+                    selectedCategory = value!;
                   });
                 },
               ),
 
               const SizedBox(height: 16),
 
-              Label(text: 'DATE'),
+              Label(text: 'TARGET DATE'),
 
               const SizedBox(height: 8),
 
-              //Date picker
               DatePicker(
-                date: selectedDate,
-                onChanged: (date) => setState(() {
-                  selectedDate = date;
-                }),
+                date: dueDate,
+                onChanged: (date) {
+                  setState(() {
+                    dueDate = date;
+                  });
+                },
               ),
 
               const SizedBox(height: 24),
 
-              //save TRansaction button
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () async {
-                    final amount = double.parse(amountController.text);
-                    final transaction = BudgetTransaction(
-                      amount: amount,
-                      date: selectedDate,
-                      title: descriptionController.text,
-                      type: isExpense ? "expense" : "income",
-                      category: selectedCategory,
+                    final goal = SavingGoal(
                       id: DateTime.now().toIso8601String(),
+                      title: titleController.text,
+                      category: selectedCategory,
+                      currentAmount:
+                          double.tryParse(currentAmountController.text) ?? 0,
+                      targetAmount: double.parse(targetAmountController.text),
+                      dueDate: dueDate,
+                      createdAt: DateTime.now(),
                     );
-                    await ref
-                        .read(transactionsProvider.notifier)
-                        .addTransaction(transaction);
-                    print(selectedCategory);
+
+                    await ref.read(goalsProvider.notifier).addGoal(goal);
+
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF00D084),
-                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   child: const Text(
-                    'Save Transaction',
+                    'Create Goal',
                     style: TextStyle(
+                      color: Colors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
-                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -215,17 +185,6 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       ),
     );
   }
-
-  // Widget _label(String text) {
-  //   return Text(
-  //     text,
-  //     style: const TextStyle(
-  //       color: Color(0xFF8B8BB5),
-  //       fontSize: 12,
-  //       fontWeight: FontWeight.w600,
-  //     ),
-  //   );
-  // }
 
   Widget _textField({
     required TextEditingController controller,

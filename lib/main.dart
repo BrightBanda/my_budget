@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_budget/src/presentation/view/Home_router.dart';
-import 'package:my_budget/src/presentation/view/home_page.dart';
 
 void main() {
   runApp(ProviderScope(child: const MyApp()));

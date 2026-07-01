@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
 
-class GoalCard extends StatelessWidget {
+class GoalListCard extends StatelessWidget {
   final String title;
   final String remainingDays;
   final String currentAmount;
@@ -9,7 +9,7 @@ class GoalCard extends StatelessWidget {
   final double progress;
   final String funded;
 
-  const GoalCard({
+  const GoalListCard({
     super.key,
     required this.title,
     required this.remainingDays,

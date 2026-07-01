@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:my_budget/src/providers/transaction_provider.dart';
 import 'package:my_budget/src/utils/add_button.dart';
 import 'package:my_budget/src/utils/add_transaction_sheet.dart';
 

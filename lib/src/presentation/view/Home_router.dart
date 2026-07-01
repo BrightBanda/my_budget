@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:my_budget/src/presentation/view/analytics_page.dart';
 import 'package:my_budget/src/presentation/view/goals_page.dart';
 import 'package:my_budget/src/presentation/view/home_page.dart';
 import 'package:my_budget/src/presentation/view/transactions_page.dart';

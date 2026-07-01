@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:my_budget/src/presentation/view/transactions_page.dart';
 import 'package:my_budget/src/presentation/viewmodel/page_notifier.dart';
 import 'package:my_budget/src/providers/balance_provider.dart';
 import 'package:my_budget/src/providers/transaction_provider.dart';
-import 'package:my_budget/src/utils/add_button.dart';
-import 'package:my_budget/src/utils/add_transaction_sheet.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
 import 'package:my_budget/src/utils/app_dialog.dart';
-import 'package:my_budget/src/utils/balance_summary_card.dart';
-import 'package:my_budget/src/utils/goal_card.dart';
+import 'package:my_budget/src/utils/cards/balance_summary_card.dart';
+import 'package:my_budget/src/utils/cards/goal_list_card.dart';
 import 'package:my_budget/src/utils/label.dart';
-import 'package:my_budget/src/utils/statistics_card.dart';
+import 'package:my_budget/src/utils/cards/statistics_card.dart';
 import 'package:my_budget/src/utils/transactions_page/transaction_card.dart';
-import 'package:my_budget/src/utils/transactions_page/transaction_list.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -38,32 +34,6 @@ class _HomePageState extends ConsumerState<HomePage> {
           child: Column(
             spacing: 10,
             children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  spacing: 6,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (builder) => TransactionsPage(),
-                          ),
-                        );
-                      },
-                      child: Text("Dashboard"),
-                    ),
-                    ElevatedButton(onPressed: () {}, child: Text("Goals")),
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: Text("BudgetTransactions"),
-                    ),
-                    ElevatedButton(onPressed: () {}, child: Text("Analytics")),
-                  ],
-                ),
-              ),
-
               //balance summary sheet
               BalanceCard(balance: ref.watch(balanceProvider).toString()),
 
@@ -103,7 +73,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               Label(text: "Goals", fontSize: 16, fontWeight: FontWeight.w700),
               Column(
                 children: const [
-                  GoalCard(
+                  GoalListCard(
                     title: "New Laptop",
                     remainingDays: "187 days left",
                     currentAmount: "MWK 87,500",
@@ -114,7 +84,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
                   SizedBox(height: 12),
 
-                  GoalCard(
+                  GoalListCard(
                     title: "Holiday Trip",
                     remainingDays: "95 days left",
                     currentAmount: "MWK 42,000",
