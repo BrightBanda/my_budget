@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_budget/src/presentation/viewmodel/page_notifier.dart';
 import 'package:my_budget/src/providers/balance_provider.dart';
+import 'package:my_budget/src/providers/goals_provider.dart';
 import 'package:my_budget/src/providers/transaction_provider.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
 import 'package:my_budget/src/utils/app_dialog.dart';
@@ -9,7 +10,7 @@ import 'package:my_budget/src/utils/cards/balance_summary_card.dart';
 import 'package:my_budget/src/utils/cards/goal_list_card.dart';
 import 'package:my_budget/src/utils/label.dart';
 import 'package:my_budget/src/utils/cards/statistics_card.dart';
-import 'package:my_budget/src/utils/transactions_page/transaction_card.dart';
+import 'package:my_budget/src/utils/cards/transaction_card.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -22,6 +23,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final transactions = ref.watch(transactionsProvider);
+    final goals = ref.watch(goalsProvider);
     final int maxRecentItemCount = 2;
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -71,28 +73,59 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ],
               ),
               Label(text: "Goals", fontSize: 16, fontWeight: FontWeight.w700),
-              Column(
-                children: const [
-                  GoalListCard(
-                    title: "New Laptop",
-                    remainingDays: "187 days left",
-                    currentAmount: "MWK 87,500",
-                    targetAmount: "MWK 350,000",
-                    progress: 0.25,
-                    funded: "25% funded",
-                  ),
+              // Column(
+              //   children: const [
+              //     GoalListCard(
+              //       title: "New Laptop",
+              //       remainingDays: "187 days left",
+              //       currentAmount: "MWK 87,500",
+              //       targetAmount: "MWK 350,000",
+              //       progress: 0.25,
+              //       funded: "25% funded",
+              //     ),
 
-                  SizedBox(height: 12),
+              //     SizedBox(height: 12),
 
-                  GoalListCard(
-                    title: "Holiday Trip",
-                    remainingDays: "95 days left",
-                    currentAmount: "MWK 42,000",
-                    targetAmount: "MWK 200,000",
-                    progress: 0.90,
-                    funded: "21% funded",
-                  ),
-                ],
+              //     GoalListCard(
+              //       title: "Holiday Trip",
+              //       remainingDays: "95 days left",
+              //       currentAmount: "MWK 42,000",
+              //       targetAmount: "MWK 200,000",
+              //       progress: 0.90,
+              //       funded: "21% funded",
+              //     ),
+              //   ],
+              // ),
+              goals.when(
+                data: (items) {
+                  if (items.isEmpty) {
+                    return const Text(
+                      "No goals yet",
+                      style: TextStyle(color: Colors.white54),
+                    );
+                  }
+                  final int length = 2;
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: items.length < 2 ? items.length : length,
+                    itemBuilder: (context, index) {
+                      final goal = items[index];
+
+                      return GoalListCard(
+                        title: goal.title,
+                        remainingDays: goal.dueDate.toString(),
+                        currentAmount: goal.currentAmount.toString(),
+                        targetAmount: goal.targetAmount.toString(),
+                        progress: goal.progress,
+                        funded:
+                            "${(goal.progress * 100).toStringAsFixed(0)}% funded",
+                      );
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(child: Text(error.toString())),
               ),
 
               //recent transactions
