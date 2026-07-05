@@ -16,7 +16,8 @@ class CustomNavBar extends StatelessWidget {
       ('Dashboard', Icons.dashboard_outlined),
       ('Goals', Icons.track_changes_outlined),
       ('Transactions', Icons.list_alt_outlined),
-      //('Analytics', Icons.analytics),
+      ('Analytics', Icons.analytics),
+      ("Settings", Icons.settings),
     ];
 
     return Container(
@@ -27,12 +28,14 @@ class CustomNavBar extends StatelessWidget {
           bottom: BorderSide(color: Color.fromARGB(113, 30, 35, 80)),
         ),
       ),
-      child: Row(
-        children: List.generate(items.length, (index) {
-          final selected = currentIndex == index;
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          spacing: 14,
+          children: List.generate(items.length, (index) {
+            final selected = currentIndex == index;
 
-          return Expanded(
-            child: InkWell(
+            return InkWell(
               onTap: () => onTap(index),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -68,9 +71,9 @@ class CustomNavBar extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }

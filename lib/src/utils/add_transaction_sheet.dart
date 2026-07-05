@@ -183,7 +183,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () async {
-                    final amount = double.parse(amountController.text);
+                    final amount = parseCurrency(amountController.text);
                     final transaction = BudgetTransaction(
                       amount: amount,
                       date: selectedDate,
@@ -252,4 +252,8 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       ),
     );
   }
+}
+
+double parseCurrency(String value) {
+  return double.tryParse(value.replaceAll(',', '')) ?? 0;
 }

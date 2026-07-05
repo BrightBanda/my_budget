@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/presentation/view/analytics_page.dart';
 import 'package:my_budget/src/presentation/view/goals_page.dart';
 import 'package:my_budget/src/presentation/view/home_page.dart';
+import 'package:my_budget/src/presentation/view/settings_page.dart';
 import 'package:my_budget/src/presentation/view/transactions_page.dart';
 import 'package:my_budget/src/presentation/viewmodel/page_notifier.dart';
 import 'package:my_budget/src/utils/custom_nav_bar.dart';
@@ -14,7 +16,8 @@ class HomeRouter extends ConsumerWidget {
     HomePage(),
     GoalsPage(),
     TransactionsPage(),
-    //AnalyticsPage(),
+    AnalyticsPage(),
+    SettingsPage(),
   ];
 
   @override
