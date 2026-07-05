@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_budget/src/utils/currency_formatter.dart';
 
 class TransactionAmountWidget extends StatelessWidget {
   final double amount;
@@ -13,7 +14,7 @@ class TransactionAmountWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      '${isIncome ? '+' : '-'}MWK ${amount.toStringAsFixed(0)}',
+      '${isIncome ? '+' : '-'}${amount.mwk}',
       style: TextStyle(
         color: isIncome ? const Color(0xFF00D084) : const Color(0xFFFF0055),
         fontWeight: FontWeight.bold,

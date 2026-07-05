@@ -11,6 +11,7 @@ import 'package:my_budget/src/utils/cards/goal_list_card.dart';
 import 'package:my_budget/src/utils/label.dart';
 import 'package:my_budget/src/utils/cards/statistics_card.dart';
 import 'package:my_budget/src/utils/cards/transaction_card.dart';
+import 'package:my_budget/src/utils/currency_formatter.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -37,7 +38,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             spacing: 10,
             children: [
               //balance summary sheet
-              BalanceCard(balance: ref.watch(balanceProvider).toString()),
+              BalanceCard(balance: ref.watch(balanceProvider).mwk),
 
               //summary
               Label(text: "Summary", fontSize: 16, fontWeight: FontWeight.w700),
@@ -115,8 +116,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                       return GoalListCard(
                         title: goal.title,
                         remainingDays: goal.dueDate.toString(),
-                        currentAmount: goal.currentAmount.toString(),
-                        targetAmount: goal.targetAmount.toString(),
+                        currentAmount: goal.currentAmount,
+                        targetAmount: goal.targetAmount,
                         progress: goal.progress,
                         funded:
                             "${(goal.progress * 100).toStringAsFixed(0)}% funded",

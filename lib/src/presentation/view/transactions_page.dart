@@ -69,13 +69,6 @@ class TransactionsPage extends ConsumerWidget {
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () async {
-                          // final ids = selectedIds.toList();
-
-                          // for (final id in ids) {
-                          //   await ref
-                          //       .read(transactionsProvider.notifier)
-                          //       .deleteTransaction(id);
-                          // }
                           showDialog(
                             context: context,
                             builder: (builder) => AppDialog(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_budget/src/utils/currency_formatter.dart';
 
 class BalanceCard extends StatelessWidget {
   final String balance;
@@ -32,7 +33,7 @@ class BalanceCard extends StatelessWidget {
           const SizedBox(height: 10),
 
           Text(
-            "MK $balance",
+            "${balance}",
             style: TextStyle(
               color: Colors.white,
               fontSize: 38,

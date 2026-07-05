@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
+import 'package:my_budget/src/utils/currency_formatter.dart';
 
 class GoalListCard extends StatelessWidget {
   final String title;
   final String remainingDays;
-  final String currentAmount;
-  final String targetAmount;
+  final double currentAmount;
+  final double targetAmount;
   final double progress;
   final String funded;
 
@@ -70,14 +71,14 @@ class GoalListCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    currentAmount,
+                    currentAmount.mwk,
                     style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    targetAmount,
+                    targetAmount.mwk,
                     style: const TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 12,

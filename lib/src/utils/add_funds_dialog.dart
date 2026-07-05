@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:my_budget/src/utils/currency_formatter.dart';
+import 'package:my_budget/src/utils/currency_input_formatter.dart';
 
 class AddFundsResult {
   final double amount;
@@ -36,6 +39,10 @@ class _AddFundsDialogState extends State<AddFundsDialog> {
         children: [
           TextField(
             controller: _amountController,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              CurrencyInputFormatter(),
+            ],
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
@@ -75,7 +82,7 @@ class _AddFundsDialogState extends State<AddFundsDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            final amount = double.tryParse(_amountController.text);
+            final amount = parseCurrency(_amountController.text);
 
             if (amount == null || amount <= 0) {
               return;
@@ -101,4 +108,8 @@ Future<AddFundsResult?> showAddFundsDialog(BuildContext context) {
     context: context,
     builder: (_) => const AddFundsDialog(),
   );
+}
+
+double parseCurrency(String value) {
+  return double.tryParse(value.replaceAll(',', '')) ?? 0;
 }

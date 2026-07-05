@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_budget/src/data/models/transaction.dart';
 import 'package:my_budget/src/providers/transaction_provider.dart';
+import 'package:my_budget/src/utils/currency_input_formatter.dart';
 import 'package:my_budget/src/utils/label.dart';
 import 'package:my_budget/src/utils/transaction_sheet/category_selector.dart';
 import 'package:my_budget/src/utils/transaction_sheet/date_picker.dart';
@@ -96,6 +98,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                 controller: amountController,
                 hint: '0',
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  CurrencyInputFormatter(),
+                ],
               ),
 
               const SizedBox(height: 16),
@@ -216,25 +222,16 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     );
   }
 
-  // Widget _label(String text) {
-  //   return Text(
-  //     text,
-  //     style: const TextStyle(
-  //       color: Color(0xFF8B8BB5),
-  //       fontSize: 12,
-  //       fontWeight: FontWeight.w600,
-  //     ),
-  //   );
-  // }
-
   Widget _textField({
     required TextEditingController controller,
     required String hint,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       style: const TextStyle(color: Colors.white),
       decoration: _inputDecoration().copyWith(hintText: hint),
     );

@@ -10,6 +10,7 @@ import 'package:my_budget/src/utils/add_transaction_sheet.dart';
 import 'package:my_budget/src/utils/app_dialog.dart';
 import 'package:my_budget/src/utils/cards/deduction_card.dart';
 import 'package:my_budget/src/utils/cards/goal_card.dart';
+import 'package:my_budget/src/utils/currency_formatter.dart';
 
 class GoalsPage extends ConsumerWidget {
   const GoalsPage({super.key});
@@ -118,15 +119,6 @@ class GoalsPage extends ConsumerWidget {
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
                             builder: (_) => const AddGoalSheet(),
-                          );
-
-                          final goal = SavingGoal(
-                            id: DateTime.now().toIso8601String(),
-                            title: "new goal",
-                            currentAmount: 200,
-                            targetAmount: 1000,
-                            dueDate: DateTime.now(),
-                            createdAt: DateTime.now(),
                           );
                         },
                       ),

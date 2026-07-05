@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_budget/src/data/models/savings_goal.dart';
 import 'package:my_budget/src/providers/goals_provider.dart';
+import 'package:my_budget/src/utils/currency_input_formatter.dart';
 import 'package:my_budget/src/utils/label.dart';
 import 'package:my_budget/src/utils/transaction_sheet/date_picker.dart';
 
@@ -88,6 +90,10 @@ class _AddGoalSheetState extends ConsumerState<AddGoalSheet> {
                 controller: targetAmountController,
                 hint: '350000',
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  CurrencyInputFormatter(),
+                ],
               ),
 
               const SizedBox(height: 16),
@@ -100,6 +106,10 @@ class _AddGoalSheetState extends ConsumerState<AddGoalSheet> {
                 controller: currentAmountController,
                 hint: '0',
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  CurrencyInputFormatter(),
+                ],
               ),
 
               const SizedBox(height: 16),
@@ -153,8 +163,8 @@ class _AddGoalSheetState extends ConsumerState<AddGoalSheet> {
                       title: titleController.text,
                       category: selectedCategory,
                       currentAmount:
-                          double.tryParse(currentAmountController.text) ?? 0,
-                      targetAmount: double.parse(targetAmountController.text),
+                          parseCurrency(currentAmountController.text) ?? 0,
+                      targetAmount: parseCurrency(targetAmountController.text),
                       dueDate: dueDate,
                       createdAt: DateTime.now(),
                     );
@@ -190,10 +200,12 @@ class _AddGoalSheetState extends ConsumerState<AddGoalSheet> {
     required TextEditingController controller,
     required String hint,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       style: const TextStyle(color: Colors.white),
       decoration: _inputDecoration().copyWith(hintText: hint),
     );
@@ -214,4 +226,8 @@ class _AddGoalSheetState extends ConsumerState<AddGoalSheet> {
       ),
     );
   }
+}
+
+double parseCurrency(String value) {
+  return double.tryParse(value.replaceAll(',', '')) ?? 0;
 }

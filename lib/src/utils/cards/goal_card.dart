@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
+import 'package:my_budget/src/utils/currency_formatter.dart';
 
 class GoalCard extends StatelessWidget {
   final String title;
@@ -107,7 +108,7 @@ class GoalCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  "MWK ${currentAmount.toInt()}",
+                  "MWK ${currentAmount.mwk}",
                   style: const TextStyle(
                     color: Colors.greenAccent,
                     fontWeight: FontWeight.bold,
@@ -115,7 +116,7 @@ class GoalCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  "of MWK ${targetAmount.toInt()}",
+                  "of MWK ${targetAmount.mwk}",
                   style: const TextStyle(color: Colors.white54),
                 ),
               ],
@@ -137,7 +138,7 @@ class GoalCard extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "${(progress * 100).toStringAsFixed(1)}% funded · need MWK ${remaining.toInt()} more",
+                "${(progress * 100).toStringAsFixed(1)}% funded · need MWK ${remaining.mwk} more",
                 style: const TextStyle(color: Colors.white54),
               ),
             ),
