@@ -144,6 +144,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                 style: const TextStyle(color: Colors.white),
                 decoration: _inputDecoration(),
                 items: const [
+                  DropdownMenuItem(value: 'Bank', child: Text('Bank')),
                   DropdownMenuItem(
                     value: 'Airtel Money',
                     child: Text('Airtel Money'),
@@ -191,11 +192,12 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                       type: isExpense ? "expense" : "income",
                       category: selectedCategory,
                       id: DateTime.now().toIso8601String(),
+                      provider: selectedProvider,
                     );
                     await ref
                         .read(transactionsProvider.notifier)
                         .addTransaction(transaction);
-                    print(selectedCategory);
+                    print(transaction.provider);
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(

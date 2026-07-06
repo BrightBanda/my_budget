@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:my_budget/src/utils/currency_formatter.dart';
 
 class OverviewCard extends StatelessWidget {
   final String title;
-  final String value;
+  final double value;
   final String subtitle;
   final IconData icon;
   final Color iconColor;
@@ -36,7 +37,7 @@ class OverviewCard extends StatelessWidget {
           const Spacer(),
 
           Text(
-            value,
+            value.mwk,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,

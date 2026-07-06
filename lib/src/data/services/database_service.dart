@@ -5,7 +5,8 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseService {
   static const _databaseName = 'budget.db';
-  static const _databaseVersion = 1;
+  static const _databaseVersion =
+      2; // bumped from 1 -> 2 for the `provider` column
 
   static const budgettransactionsTable = 'budgettransactions';
   static const savinggoalsTable = 'savinggoals';
@@ -26,6 +27,7 @@ class DatabaseService {
       join(dbPath, _databaseName),
       version: _databaseVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -42,7 +44,8 @@ class DatabaseService {
         type TEXT NOT NULL,
         category TEXT NOT NULL,
         amount REAL NOT NULL,
-        date TEXT NOT NULL
+        date TEXT NOT NULL,
+        provider TEXT NOT NULL DEFAULT 'Cash'
       )
     ''');
 
@@ -55,6 +58,15 @@ class DatabaseService {
   dueDate TEXT NOT NULL,
   createdAt TEXT NOT NULL
 )''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        ALTER TABLE $budgettransactionsTable
+        ADD COLUMN provider TEXT NOT NULL DEFAULT 'Cash'
+      ''');
+    }
   }
 
   Future<List<BudgetTransaction>> getTransactions() async {
@@ -108,6 +120,23 @@ class DatabaseService {
     final db = await database;
 
     await db.delete(budgettransactionsTable, where: 'id = ?', whereArgs: [id]);
+  }
+
+  /// Transactions filtered by provider at the SQL level — useful if you'd rather
+  /// filter in the database than in-memory (e.g. for a paginated list later).
+  Future<List<BudgetTransaction>> getTransactionsByProvider(
+    String provider,
+  ) async {
+    final db = await database;
+
+    final result = await db.query(
+      budgettransactionsTable,
+      where: 'provider = ?',
+      whereArgs: [provider],
+      orderBy: 'date DESC',
+    );
+
+    return result.map((json) => BudgetTransaction.fromMap(json)).toList();
   }
 
   // goals methods

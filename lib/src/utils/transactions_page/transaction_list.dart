@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_budget/src/providers/transaction_provider.dart';
 import 'package:my_budget/src/providers/transaction_selection_provider.dart';
+import 'package:my_budget/src/providers/transaction_filters_provider.dart';
 import 'package:my_budget/src/utils/app_dialog.dart';
 import 'package:my_budget/src/utils/cards/transaction_card.dart';
 
@@ -17,33 +18,45 @@ class TransactionsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(transactionsProvider);
+    // Main list respects the date/provider filters; smaller previews
+    // (e.g. a "recent transactions" widget elsewhere) show everything unfiltered.
+    final transactions = isMainList
+        ? ref.watch(filteredTransactionsProvider)
+        : ref.watch(transactionsProvider);
+
     final selectedIds = ref.watch(transactionSelectionProvider);
 
     return transactions.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-
       error: (error, stack) => Center(child: Text(error.toString())),
-
       data: (items) {
         final displayCount = isMainList
             ? items.length
             : (itemCount > items.length ? items.length : itemCount);
+
+        if (displayCount == 0) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                'No transactions match these filters',
+                style: TextStyle(color: Colors.white54),
+              ),
+            ),
+          );
+        }
 
         return ListView.builder(
           shrinkWrap: true,
           itemCount: displayCount,
           itemBuilder: (context, index) {
             final transaction = items[index];
-
             final isSelected = selectedIds.contains(transaction.id);
-
             final isSelecting = selectedIds.isNotEmpty;
 
             return TransactionCard(
               transaction: transaction,
               selected: isSelected,
-
               onLongPress: isSelecting
                   ? null
                   : () {
@@ -51,7 +64,6 @@ class TransactionsList extends ConsumerWidget {
                           .read(transactionSelectionProvider.notifier)
                           .toggle(transaction.id);
                     },
-
               onTap: isSelecting
                   ? () {
                       ref
@@ -59,7 +71,6 @@ class TransactionsList extends ConsumerWidget {
                           .toggle(transaction.id);
                     }
                   : () {},
-
               onDeletePressed: () {
                 showDialog(
                   context: context,
