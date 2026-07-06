@@ -29,6 +29,11 @@ class DatabaseService {
     );
   }
 
+  Future<String> databasePath() async {
+    final db = await database;
+    return db.path;
+  }
+
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE $budgettransactionsTable(
@@ -205,7 +210,13 @@ class DatabaseService {
   }
 
   Future<void> close() async {
-    final db = await database;
-    await db.close();
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+  }
+
+  Future<void> reopen() async {
+    _database = await _initDatabase();
   }
 }

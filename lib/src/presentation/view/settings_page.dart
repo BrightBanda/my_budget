@@ -1,11 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/data/services/google_auth_service.dart';
+import 'package:my_budget/src/presentation/viewmodel/backup_restore_notifier.dart';
+import 'package:my_budget/src/providers/backup_restore_provider.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
+import 'package:my_budget/src/utils/loading_dialog.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends ConsumerState<SettingsPage> {
+  @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<void>>(backupRestoreProvider, (previous, next) {
+      final notifier = ref.read(backupRestoreProvider.notifier);
+
+      // Guard Clause: Ignore state emissions if no backup/restore action is running
+      if (notifier.operation == BackupOperation.idle) return;
+
+      if (next.isLoading) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => LoadingDialog(
+            message: notifier.operation == BackupOperation.backup
+                ? "Backing up your data..."
+                : "Restoring your data...",
+          ),
+        );
+        return;
+      }
+
+      if (previous?.isLoading == true) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      next.whenOrNull(
+        data: (_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.green,
+              content: Text(
+                notifier.operation == BackupOperation.backup
+                    ? "Backup completed successfully."
+                    : "Restore completed successfully.",
+              ),
+            ),
+          );
+          notifier.resetOperation();
+        },
+        error: (error, _) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.red,
+              content: Text(error.toString()),
+            ),
+          );
+          notifier.resetOperation();
+        },
+      );
+    });
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Padding(
@@ -27,14 +86,24 @@ class SettingsPage extends StatelessWidget {
               icon: Icons.backup_outlined,
               title: "Backup Data",
               subtitle: "Save data to Google Drive",
-              onTap: () {},
+              onTap: () async {
+                final user = await GoogleAuthService().signIn();
+                if (user == null) return;
+
+                await ref.read(backupRestoreProvider.notifier).backup();
+              },
             ),
 
             _SettingsTile(
               icon: Icons.restore,
               title: "Restore Backup",
-              subtitle: "Restore data from backup",
-              onTap: () {},
+              subtitle: "Restore data from Google Drive",
+              onTap: () async {
+                final user = await GoogleAuthService().signIn();
+                if (user == null) return;
+
+                await ref.read(backupRestoreProvider.notifier).restore();
+              },
             ),
 
             _SettingsTile(
@@ -104,7 +173,7 @@ class _SettingsTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final Color iconColor;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _SettingsTile({
     required this.icon,
