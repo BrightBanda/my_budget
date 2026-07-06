@@ -18,7 +18,8 @@ class StatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(18),
@@ -31,7 +32,7 @@ class StatsCard extends StatelessWidget {
             title.toUpperCase(),
             style: const TextStyle(
               color: AppColors.textSecondary,
-              fontSize: 12,
+              fontSize: 10,
             ),
           ),
 
@@ -41,7 +42,7 @@ class StatsCard extends StatelessWidget {
             value,
             style: TextStyle(
               color: valueColor,
-              fontSize: 28,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),

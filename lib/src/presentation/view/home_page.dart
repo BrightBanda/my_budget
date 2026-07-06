@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_budget/src/presentation/viewmodel/page_notifier.dart';
+import 'package:my_budget/src/providers/analytics/monthly_spending_change_provider.dart';
 import 'package:my_budget/src/providers/balance_provider.dart';
 import 'package:my_budget/src/providers/goals_provider.dart';
 import 'package:my_budget/src/providers/transaction_provider.dart';
@@ -12,6 +13,8 @@ import 'package:my_budget/src/utils/label.dart';
 import 'package:my_budget/src/utils/cards/statistics_card.dart';
 import 'package:my_budget/src/utils/cards/transaction_card.dart';
 import 'package:my_budget/src/utils/currency_formatter.dart';
+import 'package:my_budget/src/providers/analytics/daily_average_spending_monthly_provider.dart';
+import 'package:my_budget/src/providers/analytics/weekly_transactions_provider.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -26,6 +29,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     final transactions = ref.watch(transactionsProvider);
     final goals = ref.watch(goalsProvider);
     final int maxRecentItemCount = 2;
+
+    final averageDaily = ref.watch(averageDailySpendingProvider);
+    final change = ref.watch(monthlySpendingChangeProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
 
@@ -52,51 +58,50 @@ class _HomePageState extends ConsumerState<HomePage> {
                 childAspectRatio: 1.2,
                 children: [
                   StatsCard(
-                    title: "Savings rate",
-                    value: "59%",
-                    subtitle: "of income saved",
+                    title: "Savings",
+                    value: "${change.toStringAsFixed(1)}%",
+                    subtitle: change >= 0
+                        ? "Less spent than last month"
+                        : "More spent than last month",
                   ),
                   StatsCard(
-                    title: "AVG/Day",
-                    value: "MK 8500",
+                    title: "AVG/Day (This month)",
+                    value: averageDaily.mwkDecimal,
                     subtitle: "daily spend",
                   ),
                   StatsCard(
-                    title: "Transactions",
-                    value: "120",
+                    title: " Weekly Transactions",
+                    value: ref.watch(weeklyTransactionsProvider).toString(),
                     subtitle: "total recorded",
                   ),
-                  StatsCard(
-                    title: "Goals",
-                    value: "2",
-                    subtitle: "0 completed",
+                  goals.when(
+                    data: (goals) {
+                      final totalGoals = goals.length;
+                      final completedGoals = goals
+                          .where((goal) => goal.isCompleted)
+                          .length;
+
+                      return StatsCard(
+                        title: "Goals",
+                        value: totalGoals.toString(),
+                        subtitle: "$completedGoals completed",
+                      );
+                    },
+                    loading: () => const StatsCard(
+                      title: "Goals",
+                      value: "...",
+                      subtitle: "Loading",
+                    ),
+                    error: (error, stack) => const StatsCard(
+                      title: "Goals",
+                      value: "0",
+                      subtitle: "Error",
+                    ),
                   ),
                 ],
               ),
               Label(text: "Goals", fontSize: 16, fontWeight: FontWeight.w700),
-              // Column(
-              //   children: const [
-              //     GoalListCard(
-              //       title: "New Laptop",
-              //       remainingDays: "187 days left",
-              //       currentAmount: "MWK 87,500",
-              //       targetAmount: "MWK 350,000",
-              //       progress: 0.25,
-              //       funded: "25% funded",
-              //     ),
 
-              //     SizedBox(height: 12),
-
-              //     GoalListCard(
-              //       title: "Holiday Trip",
-              //       remainingDays: "95 days left",
-              //       currentAmount: "MWK 42,000",
-              //       targetAmount: "MWK 200,000",
-              //       progress: 0.90,
-              //       funded: "21% funded",
-              //     ),
-              //   ],
-              // ),
               goals.when(
                 data: (items) {
                   if (items.isEmpty) {

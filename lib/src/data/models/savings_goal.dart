@@ -18,7 +18,7 @@ class SavingGoal {
   });
 
   double get progress => currentAmount / targetAmount;
-
+  bool get isCompleted => currentAmount >= targetAmount;
   int get daysLeft => dueDate.difference(DateTime.now()).inDays;
 
   Map<String, dynamic> toMap() {

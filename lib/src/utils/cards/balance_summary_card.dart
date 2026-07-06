@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/providers/analytics/total_monthly_expense_provider.dart';
+import 'package:my_budget/src/providers/analytics/total_monthly_income_provider.dart';
 import 'package:my_budget/src/utils/currency_formatter.dart';
 
-class BalanceCard extends StatelessWidget {
+class BalanceCard extends ConsumerWidget {
   final String balance;
   const BalanceCard({super.key, required this.balance});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -48,13 +51,13 @@ class BalanceCard extends StatelessWidget {
             children: [
               _statItem(
                 Icon(Icons.trending_up, color: Colors.white),
-                "Income",
-                "MWK 180,001",
+                "Monthly Income",
+                ref.watch(monthlyIncomeProvider).mwk,
               ),
               _statItem(
                 Icon(Icons.trending_down, color: Colors.white),
-                "Expenses",
-                "MWK 73,500",
+                "Monthly Expenses",
+                ref.watch(monthlyExpenseProvider).mwk,
               ),
             ],
           ),
