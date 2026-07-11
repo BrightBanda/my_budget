@@ -13,7 +13,7 @@ class HeaderSection extends ConsumerWidget {
       child: Row(
         children: [
           const Text(
-            "BudgetPal",
+            "BUDGETEER",
             style: TextStyle(
               color: Colors.white,
               fontSize: 22,

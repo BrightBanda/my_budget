@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
 import 'package:my_budget/src/utils/currency_formatter.dart';
 
@@ -7,7 +8,7 @@ class GoalCard extends StatelessWidget {
   final double currentAmount;
   final double targetAmount;
   final int daysLeft;
-  final String dueDate;
+  final DateTime dueDate;
   final VoidCallback? onAddFunds;
   final bool selected;
   final VoidCallback? onTap;
@@ -96,8 +97,9 @@ class GoalCard extends StatelessWidget {
                   ),
                 ),
 
+                //due date
                 Text(
-                  dueDate,
+                  "Due: " + DateFormat('dd MMM yyyy').format(dueDate),
                   style: const TextStyle(color: Colors.white54, fontSize: 12),
                 ),
               ],

@@ -150,7 +150,7 @@ class GoalsPage extends ConsumerWidget {
                           currentAmount: goal.currentAmount,
                           targetAmount: goal.targetAmount,
                           daysLeft: goal.daysLeft,
-                          dueDate: goal.dueDate.toString().split(' ')[0],
+                          dueDate: goal.dueDate,
 
                           selected: isSelected,
 

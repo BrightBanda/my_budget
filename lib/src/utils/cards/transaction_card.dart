@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:my_budget/src/data/models/transaction.dart';
 import 'package:my_budget/src/utils/currency_formatter.dart';
 import 'package:my_budget/src/utils/transactions_page/transaction_amount_widget.dart';
@@ -51,6 +52,7 @@ class TransactionCard extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // title
                   Text(
                     transaction.title,
                     style: const TextStyle(
@@ -61,16 +63,16 @@ class TransactionCard extends ConsumerWidget {
                   ),
 
                   const SizedBox(height: 4),
-
+                  //category
                   Text(
                     transaction.category,
                     style: const TextStyle(color: Color(0xFF7272A6)),
                   ),
 
                   const SizedBox(height: 4),
-
+                  //date
                   Text(
-                    transaction.date.toIso8601String().split('T').first,
+                    DateFormat('dd MMM yyyy • HH:mm').format(transaction.date),
                     style: const TextStyle(
                       color: Color(0xFF7272A6),
                       fontSize: 12,

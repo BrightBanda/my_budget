@@ -18,8 +18,6 @@ class TransactionsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Main list respects the date/provider filters; smaller previews
-    // (e.g. a "recent transactions" widget elsewhere) show everything unfiltered.
     final transactions = isMainList
         ? ref.watch(filteredTransactionsProvider)
         : ref.watch(transactionsProvider);
