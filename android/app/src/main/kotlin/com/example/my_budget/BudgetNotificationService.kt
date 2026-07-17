@@ -11,88 +11,42 @@ class BudgetNotificationService : NotificationListenerService() {
         private const val TAG = "BudgeteerNotification"
     }
 
-    override fun onCreate() {
-        super.onCreate()
-        Log.i(TAG, "Service Created")
-    }
-
     override fun onListenerConnected() {
         super.onListenerConnected()
 
-        Log.i(TAG, "Listener Connected")
-
-        try {
-
-            val notifications = activeNotifications
-
-            Log.i(TAG, "Active notifications: ${notifications.size}")
-
-        } catch (e: Exception) {
-
-            Log.e(TAG, "Error", e)
-
-        }
+        Log.i(TAG, "Listener connected")
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-
         try {
-
             val extras = sbn.notification.extras
 
-            val title =
-                extras.getString(Notification.EXTRA_TITLE)
+            val title = extras.getString(Notification.EXTRA_TITLE)
+            val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()
 
-            val text =
-                extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()
+            if (!TransactionDetector.isTransaction(title, text)) return
 
-            Log.i(TAG, "========== NEW NOTIFICATION ==========")
-            Log.i(TAG, "Package : ${sbn.packageName}")
-            Log.i(TAG, "Title   : $title")
-            Log.i(TAG, "Text    : $text")
+            val detected = TransactionParser.parse(title, text, sbn.postTime)
 
-            if (
-                TransactionDetector.isTransaction(
-                    title,
-                    text
-                )
-            ) {
-
-                val provider =
-                    TransactionDetector.provider(title, text)
-
-                Log.i(TAG, "TRANSACTION DETECTED")
-                Log.i(TAG, "Provider: $provider")
-
-                // Parser will go here next
+            if (detected == null) {
+                Log.w(TAG, "Provider matched but message did not parse: $title | $text")
+                return
             }
 
+            Log.i(TAG, "Detected ${detected.type} of ${detected.amount} via ${detected.provider}")
+
+            // Persist first, ping second: if the engine is dead the ping is dropped but the
+            // detection still reaches Dart on the next drain.
+            PendingTransactionStore.add(applicationContext, detected)
+            TransactionChannel.notifyPending()
         } catch (e: Exception) {
-
-            Log.e(TAG, "Notification Error", e)
-
+            Log.e(TAG, "Failed to handle notification", e)
         }
     }
 
-    override fun onNotificationRemoved(sbn: StatusBarNotification) {
-
-        Log.i(TAG, "Notification Removed")
-
-    }
-
     override fun onListenerDisconnected() {
-
         super.onListenerDisconnected()
 
-        Log.i(TAG, "Listener Disconnected")
-
-    }
-
-    override fun onDestroy() {
-
-        super.onDestroy()
-
-        Log.i(TAG, "Service Destroyed")
-
+        Log.i(TAG, "Listener disconnected")
     }
 }

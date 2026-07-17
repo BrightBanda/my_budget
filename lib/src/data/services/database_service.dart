@@ -105,6 +105,25 @@ class DatabaseService {
     );
   }
 
+  /// Inserts many transactions in one batch. Existing ids are replaced, which is what
+  /// makes re-importing an already-captured notification a no-op rather than a duplicate.
+  Future<void> insertTransactions(List<BudgetTransaction> transactions) async {
+    if (transactions.isEmpty) return;
+
+    final db = await database;
+    final batch = db.batch();
+
+    for (final transaction in transactions) {
+      batch.insert(
+        budgettransactionsTable,
+        transaction.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+
+    await batch.commit(noResult: true);
+  }
+
   Future<void> updateTransaction(BudgetTransaction budgettransaction) async {
     final db = await database;
 
