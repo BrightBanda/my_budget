@@ -12,7 +12,7 @@ import 'package:my_budget/src/utils/cards/goal_list_card.dart';
 import 'package:my_budget/src/utils/label.dart';
 import 'package:my_budget/src/utils/cards/statistics_card.dart';
 import 'package:my_budget/src/utils/cards/transaction_card.dart';
-import 'package:my_budget/src/utils/currency_formatter.dart';
+import 'package:my_budget/src/providers/currency_formatter_provider.dart';
 import 'package:my_budget/src/providers/analytics/daily_average_spending_monthly_provider.dart';
 import 'package:my_budget/src/providers/analytics/weekly_transactions_provider.dart';
 
@@ -32,6 +32,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     final averageDaily = ref.watch(averageDailySpendingProvider);
     final change = ref.watch(monthlySpendingChangeProvider);
+    final currency = ref.watch(currencyFormatterProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
 
@@ -44,7 +45,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             spacing: 10,
             children: [
               //balance summary sheet
-              BalanceCard(balance: ref.watch(balanceProvider).mwk),
+              BalanceCard(balance: currency.format(ref.watch(balanceProvider))),
 
               //summary
               Label(text: "Summary", fontSize: 16, fontWeight: FontWeight.w700),
@@ -66,7 +67,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ),
                   StatsCard(
                     title: "AVG/Day (This month)",
-                    value: averageDaily.mwkDecimal,
+                    value: currency.format(averageDaily, decimals: true),
                     subtitle: "daily spend",
                   ),
                   StatsCard(

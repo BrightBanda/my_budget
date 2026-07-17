@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_budget/src/data/auto_capture_state.dart';
-import 'package:my_budget/src/data/services/google_auth_service.dart';
 import 'package:my_budget/src/presentation/viewmodel/backup_restore_notifier.dart';
 import 'package:my_budget/src/providers/auto_capture_provider.dart';
 import 'package:my_budget/src/providers/backup_restore_provider.dart';
+import 'package:my_budget/src/providers/currency_provider.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
 import 'package:my_budget/src/utils/loading_dialog.dart';
+import 'package:my_budget/src/utils/settings/backup_tile.dart';
+import 'package:my_budget/src/utils/settings/currency_picker_dialog.dart';
+import 'package:my_budget/src/utils/settings/restore_tile.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -18,41 +21,10 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<AutoCaptureState>>(autoCaptureProvider, (
-      previous,
-      next,
-    ) {
-      next.whenOrNull(
-        data: (state) {
-          // Only speak up for a sync that actually landed something new. The
-          // timestamp separates two imports that happened to have equal counts.
-          if (state.lastImportedCount == 0) return;
-          if (state.lastSyncAt == previous?.value?.lastSyncAt) return;
-
-          final count = state.lastImportedCount;
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: AppColors.primary,
-              content: Text(
-                "Auto-added $count ${count == 1 ? 'transaction' : 'transactions'}.",
-              ),
-            ),
-          );
-        },
-        error: (error, _) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: Colors.red,
-              content: Text("Auto-capture failed: $error"),
-            ),
-          );
-        },
-      );
-    });
-
     final autoCapture =
         ref.watch(autoCaptureProvider).value ?? const AutoCaptureState();
+
+    final currency = ref.watch(currencyProvider);
 
     ref.listen<AsyncValue<void>>(backupRestoreProvider, (previous, next) {
       final notifier = ref.read(backupRestoreProvider.notifier);
@@ -120,29 +92,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
             const SizedBox(height: 24),
 
-            _SettingsTile(
-              icon: Icons.backup_outlined,
-              title: "Backup Data",
-              subtitle: "Save data to Google Drive",
-              onTap: () async {
-                final user = await GoogleAuthService().signIn();
-                if (user == null) return;
+            const BackupSettingsTile(),
 
-                await ref.read(backupRestoreProvider.notifier).backup();
-              },
-            ),
-
-            _SettingsTile(
-              icon: Icons.restore,
-              title: "Restore Backup",
-              subtitle: "Restore data from Google Drive",
-              onTap: () async {
-                final user = await GoogleAuthService().signIn();
-                if (user == null) return;
-
-                await ref.read(backupRestoreProvider.notifier).restore();
-              },
-            ),
+            const RestoreSettingsTile(),
 
             _SettingsTile(
               icon: autoCapture.isListenerEnabled
@@ -150,13 +102,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   : Icons.notifications_off_outlined,
               title: "Auto-Capture Transactions",
               subtitle: autoCapture.isListenerEnabled
-                  ? "Reading Airtel Money & Mpamba alerts"
+                  ? "Prompts you to add Airtel Money & Mpamba payments"
                   : "Tap to allow notification access",
               iconColor: autoCapture.isListenerEnabled
                   ? AppColors.primary
                   : Colors.white,
               onTap: autoCapture.isListenerEnabled
-                  ? () => ref.read(autoCaptureProvider.notifier).syncNow()
+                  ? () => ref.read(autoCaptureProvider.notifier).refreshPermission()
                   : () => ref
                         .read(autoCaptureProvider.notifier)
                         .requestListenerPermission(),
@@ -165,8 +117,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             _SettingsTile(
               icon: Icons.currency_exchange,
               title: "Currency",
-              subtitle: "MWK",
-              onTap: () {},
+              subtitle: "${currency.flag}  ${currency.name} (${currency.code})",
+              onTap: () => CurrencyPickerDialog.show(context),
             ),
 
             _SettingsTile(

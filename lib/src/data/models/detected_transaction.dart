@@ -1,12 +1,10 @@
-import 'package:my_budget/src/data/models/transaction.dart';
-
 /// A transaction parsed out of a mobile-money notification by the Android listener.
 ///
-/// This is the raw native payload. Turning it into one or more [BudgetTransaction]s
-/// is the mapper's job — see [DetectedTransactionMapper].
+/// This is the raw native payload. It is never written to the database directly — it
+/// pre-fills the add-transaction sheet, and the user confirms the final values.
 class DetectedTransaction {
   final String provider;
-  final String type;
+  final String type; // 'income' | 'expense'
   final double amount;
   final double? fee;
   final String? reference;
@@ -37,34 +35,23 @@ class DetectedTransaction {
       detectedAt: DateTime.fromMillisecondsSinceEpoch(map['detectedAt'] as int),
     );
   }
-}
 
-/// Maps a native detection onto the app's own transaction model.
-extension DetectedTransactionMapper on DetectedTransaction {
   bool get isIncome => type == 'income';
 
-  /// Stable across re-imports, so replaying the same detection overwrites its row
-  /// instead of duplicating it. The provider's own reference is used whenever the
-  /// message carries one; otherwise the timestamp and amount stand in.
-  String get stableId {
-    final slug = provider.toLowerCase().replaceAll(' ', '_');
+  /// A human title for the add-transaction sheet, e.g. "To ESTHER NGANGURA".
+  String get suggestedTitle {
+    final party = counterparty;
 
-    if (reference != null) return 'auto_${slug}_$reference';
-
-    return 'auto_${slug}_${detectedAt.millisecondsSinceEpoch}_${amount.toStringAsFixed(2)}';
-  }
-
-  String get _title {
-    if (counterparty != null && counterparty!.isNotEmpty) {
-      return isIncome ? 'From $counterparty' : 'To $counterparty';
+    if (party != null && party.isNotEmpty) {
+      return isIncome ? 'From $party' : 'To $party';
     }
 
     return isIncome ? '$provider deposit' : '$provider payment';
   }
 
-  /// Best-effort category guess. Anything unrecognised falls back to the catch-all
-  /// so the user can correct it, rather than being silently mis-filed.
-  String get _category {
+  /// Best-effort category guess for the sheet. Unrecognised spending falls back to the
+  /// catch-all so the user corrects it, rather than being silently mis-filed.
+  String get suggestedCategory {
     if (isIncome) return 'other';
 
     final message = rawMessage.toLowerCase();
@@ -83,37 +70,5 @@ extension DetectedTransactionMapper on DetectedTransaction {
     }
 
     return 'Other';
-  }
-
-  /// The value transaction, plus a separate expense for the provider's fee when the
-  /// message reported one — a fee leaves the balance regardless of transaction type.
-  List<BudgetTransaction> toBudgetTransactions() {
-    final transactions = <BudgetTransaction>[
-      BudgetTransaction(
-        id: stableId,
-        amount: amount,
-        title: _title,
-        date: detectedAt,
-        type: type,
-        category: _category,
-        provider: provider,
-      ),
-    ];
-
-    if (fee != null && fee! > 0) {
-      transactions.add(
-        BudgetTransaction(
-          id: '${stableId}_fee',
-          amount: fee!,
-          title: '$provider fee',
-          date: detectedAt,
-          type: 'expense',
-          category: 'Other',
-          provider: provider,
-        ),
-      );
-    }
-
-    return transactions;
   }
 }

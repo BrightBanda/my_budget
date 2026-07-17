@@ -13,8 +13,7 @@ import 'package:my_budget/src/utils/app_colors.dart';
 import 'package:my_budget/src/utils/cards/goal_progress_card.dart';
 import 'package:my_budget/src/utils/cards/insight_card.dart';
 import 'package:my_budget/src/utils/cards/overview_card.dart';
-import 'package:my_budget/src/utils/currency_formatter.dart';
-//import 'package:my_budget/src/utils/format/number_formatting.dart'; // wherever `.mwk` lives
+import 'package:my_budget/src/providers/currency_formatter_provider.dart';
 
 class AnalyticsPage extends ConsumerWidget {
   const AnalyticsPage({super.key});
@@ -45,13 +44,14 @@ class AnalyticsPage extends ConsumerWidget {
   }
 }
 
-class _AnalyticsContent extends StatelessWidget {
+class _AnalyticsContent extends ConsumerWidget {
   final AnalyticsData data; // was: dynamic — this was the bug
 
   const _AnalyticsContent({required this.data});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currency = ref.watch(currencyFormatterProvider);
     final overview = data.overview;
     final insights = data.insights;
 
@@ -225,7 +225,7 @@ class _AnalyticsContent extends StatelessWidget {
                   icon: Icons.bar_chart,
                   title: "Daily Average",
                   description:
-                      "Average daily spending is    ${insights.dailyAverageSpending.mwk}",
+                      "Average daily spending is    ${currency.format(insights.dailyAverageSpending)}",
                 ),
               ],
             ),

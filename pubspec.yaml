@@ -42,6 +42,7 @@ dependencies:
   extension_google_sign_in_as_googleapis_auth: ^2.0.0
   dio: ^5.10.0
   fl_chart: ^1.0.0
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:

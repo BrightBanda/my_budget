@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:my_budget/src/providers/currency_formatter_provider.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
-import 'package:my_budget/src/utils/currency_formatter.dart';
 
-class GoalCard extends StatelessWidget {
+class GoalCard extends ConsumerWidget {
   final String title;
   final double currentAmount;
   final double targetAmount;
@@ -28,7 +29,8 @@ class GoalCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currency = ref.watch(currencyFormatterProvider);
     final progress = currentAmount / targetAmount;
     final remaining = targetAmount - currentAmount;
 
@@ -110,7 +112,7 @@ class GoalCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  "MWK ${currentAmount.mwk}",
+                  currency.format(currentAmount),
                   style: const TextStyle(
                     color: Colors.greenAccent,
                     fontWeight: FontWeight.bold,
@@ -118,7 +120,7 @@ class GoalCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  "of MWK ${targetAmount.mwk}",
+                  "of ${currency.format(targetAmount)}",
                   style: const TextStyle(color: Colors.white54),
                 ),
               ],
@@ -140,7 +142,7 @@ class GoalCard extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "${(progress * 100).toStringAsFixed(1)}% funded · need MWK ${remaining.mwk} more",
+                "${(progress * 100).toStringAsFixed(1)}% funded · need ${currency.format(remaining)} more",
                 style: const TextStyle(color: Colors.white54),
               ),
             ),

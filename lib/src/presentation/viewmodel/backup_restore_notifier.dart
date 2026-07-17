@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/providers/backup_info_provider.dart';
 import 'package:my_budget/src/providers/balance_provider.dart';
 import 'package:my_budget/src/providers/database_service_provider.dart';
 import 'package:my_budget/src/providers/drive_service_provider.dart';
@@ -25,6 +26,24 @@ class BackupRestoreNotifier extends AsyncNotifier<void> {
 
       await drive.backupDatabase(database);
     });
+
+    // A fresh backup means a new timestamp for the restore tile to show.
+    ref.invalidate(backupInfoProvider);
+  }
+
+  /// Backs up to a different Google account, prompting the account picker first.
+  Future<void> backupWithNewAccount() async {
+    operation = BackupOperation.backup;
+    state = const AsyncLoading();
+
+    state = await AsyncValue.guard(() async {
+      final drive = ref.read(driveServiceProvider);
+      final database = ref.read(databaseServiceProvider);
+
+      await drive.backupWithNewAccount(database);
+    });
+
+    ref.invalidate(backupInfoProvider);
   }
 
   Future<void> restore() async {

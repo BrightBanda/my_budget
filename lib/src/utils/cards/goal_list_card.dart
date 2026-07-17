@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/providers/currency_formatter_provider.dart';
 import 'package:my_budget/src/utils/app_colors.dart';
-import 'package:my_budget/src/utils/currency_formatter.dart';
 
-class GoalListCard extends StatelessWidget {
+class GoalListCard extends ConsumerWidget {
   final String title;
   final String remainingDays;
   final double currentAmount;
@@ -21,7 +22,9 @@ class GoalListCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currency = ref.watch(currencyFormatterProvider);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -71,14 +74,14 @@ class GoalListCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    currentAmount.mwk,
+                    currency.format(currentAmount),
                     style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    targetAmount.mwk,
+                    currency.format(targetAmount),
                     style: const TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 12,

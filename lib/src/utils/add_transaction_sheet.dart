@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/data/models/detected_transaction.dart';
 import 'package:my_budget/src/data/models/transaction.dart';
+import 'package:my_budget/src/providers/currency_provider.dart';
 import 'package:my_budget/src/providers/transaction_provider.dart';
 import 'package:my_budget/src/utils/currency_input_formatter.dart';
 import 'package:my_budget/src/utils/label.dart';
@@ -10,7 +12,11 @@ import 'package:my_budget/src/utils/transaction_sheet/date_picker.dart';
 import 'package:my_budget/src/utils/transaction_sheet/transaction_type_toggle.dart';
 
 class AddTransactionSheet extends ConsumerStatefulWidget {
-  const AddTransactionSheet({super.key});
+  /// When set, the sheet opens pre-filled from a detected mobile-money transaction.
+  /// The user still reviews and taps Save — nothing is written until then.
+  final DetectedTransaction? prefill;
+
+  const AddTransactionSheet({super.key, this.prefill});
 
   @override
   ConsumerState<AddTransactionSheet> createState() =>
@@ -40,7 +46,38 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   DateTime selectedDate = DateTime.now();
 
   @override
+  void initState() {
+    super.initState();
+
+    final prefill = widget.prefill;
+    if (prefill != null) _applyPrefill(prefill);
+  }
+
+  /// Seeds every field from a detected transaction. Values stay fully editable.
+  void _applyPrefill(DetectedTransaction detected) {
+    isExpense = !detected.isIncome;
+    selectedProvider = detected.provider;
+    selectedCategory = detected.suggestedCategory;
+    selectedDate = detected.detectedAt;
+    descriptionController.text = detected.suggestedTitle;
+
+    // Whole amounts show without a trailing ".0"; the input formatter adds the commas.
+    final amount = detected.amount;
+    amountController.text = amount == amount.roundToDouble()
+        ? amount.toStringAsFixed(0)
+        : amount.toStringAsFixed(2);
+  }
+
+  @override
+  void dispose() {
+    amountController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final currencyCode = ref.watch(currencyProvider).code;
     return Container(
       padding: EdgeInsets.only(
         left: 20,
@@ -90,7 +127,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
 
               const SizedBox(height: 20),
 
-              Label(text: 'AMOUNT (MWK)'),
+              Label(text: 'AMOUNT ($currencyCode)'),
 
               const SizedBox(height: 8),
 

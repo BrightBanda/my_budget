@@ -10,7 +10,6 @@ import 'package:my_budget/src/utils/add_transaction_sheet.dart';
 import 'package:my_budget/src/utils/app_dialog.dart';
 import 'package:my_budget/src/utils/cards/deduction_card.dart';
 import 'package:my_budget/src/utils/cards/goal_card.dart';
-import 'package:my_budget/src/utils/currency_formatter.dart';
 
 class GoalsPage extends ConsumerWidget {
   const GoalsPage({super.key});

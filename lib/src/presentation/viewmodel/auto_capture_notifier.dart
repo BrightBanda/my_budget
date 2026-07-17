@@ -3,31 +3,30 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_budget/src/data/auto_capture_state.dart';
-import 'package:my_budget/src/data/models/detected_transaction.dart';
 import 'package:my_budget/src/data/services/transaction_detection_service.dart';
-import 'package:my_budget/src/providers/goals_provider.dart';
+import 'package:my_budget/src/providers/pending_prefill_provider.dart';
 import 'package:my_budget/src/providers/transaction_detection_service_provider.dart';
-import 'package:my_budget/src/providers/transaction_provider.dart';
 
 /// Owns automatic capture of mobile-money transactions from Android notifications.
 ///
-/// Detections reach us two ways and both funnel into [syncNow]:
-///  - a live ping on the event channel while the app is open, and
-///  - a drain on resume, covering everything queued while the app was closed.
+/// When the user taps a Budgeteer "add this transaction?" notification, the native
+/// side holds the payload; we pull it here and publish it to [pendingPrefillProvider],
+/// which the UI turns into a pre-filled add-transaction sheet. Nothing is written to
+/// the database automatically — the user confirms every capture by hand.
 ///
-/// The native queue is the source of truth, so the two paths can overlap harmlessly.
+/// A tapped transaction reaches us three ways, all funnelling into [_consumePrefill]:
+///  - on startup (the app was cold-started by the tap),
+///  - on resume (tapped while the app was backgrounded), and
+///  - via the event-channel ping (tapped while the app was open).
 class AutoCaptureNotifier extends AsyncNotifier<AutoCaptureState> {
   late final TransactionDetectionService _service;
-
-  /// Guards against a resume and an event-channel ping draining at the same time.
-  bool _isSyncing = false;
 
   @override
   Future<AutoCaptureState> build() async {
     _service = ref.read(transactionDetectionServiceProvider);
 
-    final subscription = _service.onDetection.listen((_) => syncNow());
-    final lifecycle = AppLifecycleListener(onResume: syncNow);
+    final subscription = _service.onDetection.listen((_) => _consumePrefill());
+    final lifecycle = AppLifecycleListener(onResume: _consumePrefill);
 
     ref.onDispose(() {
       subscription.cancel();
@@ -36,13 +35,10 @@ class AutoCaptureNotifier extends AsyncNotifier<AutoCaptureState> {
 
     final isEnabled = await _service.isListenerEnabled();
 
-    if (!isEnabled) return const AutoCaptureState(isListenerEnabled: false);
+    // A cold start from a notification tap already has a payload waiting.
+    await _consumePrefill();
 
-    return AutoCaptureState(
-      isListenerEnabled: true,
-      lastImportedCount: await _importPending(),
-      lastSyncAt: DateTime.now(),
-    );
+    return AutoCaptureState(isListenerEnabled: isEnabled);
   }
 
   /// Sends the user to the system notification-access screen. The resume hook picks
@@ -51,47 +47,19 @@ class AutoCaptureNotifier extends AsyncNotifier<AutoCaptureState> {
     await _service.openListenerSettings();
   }
 
-  /// Re-checks permission and imports anything queued.
-  Future<void> syncNow() async {
-    if (_isSyncing) return;
+  /// Re-checks whether notification access is still granted.
+  Future<void> refreshPermission() async {
+    final isEnabled = await _service.isListenerEnabled();
 
-    _isSyncing = true;
-
-    try {
-      final isEnabled = await _service.isListenerEnabled();
-
-      if (!isEnabled) {
-        state = const AsyncData(AutoCaptureState(isListenerEnabled: false));
-        return;
-      }
-
-      state = await AsyncValue.guard(() async {
-        return AutoCaptureState(
-          isListenerEnabled: true,
-          lastImportedCount: await _importPending(),
-          lastSyncAt: DateTime.now(),
-        );
-      });
-    } finally {
-      _isSyncing = false;
-    }
+    state = AsyncData(AutoCaptureState(isListenerEnabled: isEnabled));
   }
 
-  /// Drains the native queue into the database. Returns how many detections landed.
-  Future<int> _importPending() async {
-    final detections = await _service.drainPending();
+  /// Pulls a tapped transaction (if any) and hands it to the UI to pre-fill the sheet.
+  Future<void> _consumePrefill() async {
+    final detected = await _service.consumePrefill();
 
-    if (detections.isEmpty) return 0;
+    if (detected == null) return;
 
-    final transactions = detections
-        .expand((detection) => detection.toBudgetTransactions())
-        .toList();
-
-    await ref.read(transactionsProvider.notifier).addTransactions(transactions);
-
-    // Goals surface a live balance, so they have to see the new spend too.
-    ref.invalidate(goalsProvider);
-
-    return detections.length;
+    ref.read(pendingPrefillProvider.notifier).set(detected);
   }
 }

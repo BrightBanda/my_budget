@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:my_budget/src/utils/currency_formatter.dart';
 import 'package:my_budget/src/utils/currency_input_formatter.dart';
 
 class AddFundsResult {

@@ -19,6 +19,9 @@ class BudgetNotificationService : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         try {
+            // Ignore our own prompts, or we'd loop on them forever.
+            if (sbn.packageName == packageName) return
+
             val extras = sbn.notification.extras
 
             val title = extras.getString(Notification.EXTRA_TITLE)
@@ -35,10 +38,8 @@ class BudgetNotificationService : NotificationListenerService() {
 
             Log.i(TAG, "Detected ${detected.type} of ${detected.amount} via ${detected.provider}")
 
-            // Persist first, ping second: if the engine is dead the ping is dropped but the
-            // detection still reaches Dart on the next drain.
-            PendingTransactionStore.add(applicationContext, detected)
-            TransactionChannel.notifyPending()
+            // Prompt the user to add it — no silent writes. Tapping opens the app pre-filled.
+            TransactionNotifier.notify(applicationContext, detected)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to handle notification", e)
         }

@@ -3,12 +3,18 @@ import 'dart:io';
 import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:my_budget/src/data/models/backup_info.dart';
 import 'package:my_budget/src/data/services/database_service.dart';
 
 class DriveService {
+  static const _backupFileName = 'budget.db';
+
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', drive.DriveApi.driveAppdataScope],
   );
+
+  /// The account currently backing up, if any. Null until the user signs in.
+  String? get currentAccountEmail => _googleSignIn.currentUser?.email;
 
   Future<drive.DriveApi?> _driveApi() async {
     GoogleSignInAccount? account = _googleSignIn.currentUser;
@@ -23,6 +29,40 @@ class DriveService {
 
     return drive.DriveApi(client);
   }
+
+  /// Reads the backup's account and last-modified time without downloading it.
+  /// If the user isn't signed in this triggers the sign-in prompt, since reading
+  /// Drive requires authentication either way.
+  Future<BackupInfo> getBackupInfo() async {
+    final api = await _driveApi();
+
+    if (api == null) return const BackupInfo();
+
+    final files = await api.files.list(
+      spaces: "appDataFolder",
+      q: "name='$_backupFileName' and trashed=false",
+      $fields: "files(id,name,modifiedTime)",
+    );
+
+    final backup = (files.files != null && files.files!.isNotEmpty)
+        ? files.files!.first
+        : null;
+
+    return BackupInfo(
+      accountEmail: currentAccountEmail,
+      lastBackupAt: backup?.modifiedTime?.toLocal(),
+    );
+  }
+
+  /// Signs out first so the next backup shows the account picker, letting the user
+  /// back up to a different Google account.
+  Future<void> backupWithNewAccount(DatabaseService databaseService) async {
+    await _googleSignIn.signOut();
+
+    await backupDatabase(databaseService);
+  }
+
+  Future<void> signOut() => _googleSignIn.signOut();
 
   Future<void> backupDatabase(DatabaseService databaseService) async {
     print("========== BACKUP STARTED ==========");

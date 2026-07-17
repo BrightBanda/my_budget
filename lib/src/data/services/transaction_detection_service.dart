@@ -16,8 +16,8 @@ class TransactionDetectionService {
     'com.example.my_budget/transactions_events',
   );
 
-  /// Fires whenever the listener queues a new detection while the app is alive.
-  /// Carries no payload — it means "drain now", and [drainPending] is the source of truth.
+  /// Fires when a notification is tapped while the app is already open. Carries no
+  /// payload — it means "a tapped transaction is waiting, call [consumePrefill]".
   Stream<void> get onDetection => _eventChannel.receiveBroadcastStream();
 
   /// Whether the user has granted notification access to the app.
@@ -33,25 +33,19 @@ class TransactionDetectionService {
     await _methodChannel.invokeMethod<void>('openListenerSettings');
   }
 
-  /// Pulls every queued detection and clears the native queue.
-  Future<List<DetectedTransaction>> drainPending() async {
-    final raw = await _methodChannel.invokeListMethod<String>('drainPending');
+  /// Returns the transaction from the most recently tapped notification, or null if
+  /// none is waiting. Reading it clears it on the native side.
+  Future<DetectedTransaction?> consumePrefill() async {
+    final raw = await _methodChannel.invokeMethod<String>('consumePrefill');
 
-    if (raw == null || raw.isEmpty) return const [];
+    if (raw == null || raw.isEmpty) return null;
 
-    final detections = <DetectedTransaction>[];
-
-    for (final entry in raw) {
-      try {
-        detections.add(
-          DetectedTransaction.fromMap(jsonDecode(entry) as Map<String, dynamic>),
-        );
-      } catch (_) {
-        // A single malformed payload must not cost us the rest of the batch.
-        continue;
-      }
+    try {
+      return DetectedTransaction.fromMap(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
+    } catch (_) {
+      return null;
     }
-
-    return detections;
   }
 }

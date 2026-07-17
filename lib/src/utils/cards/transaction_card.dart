@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:my_budget/src/data/models/transaction.dart';
-import 'package:my_budget/src/utils/currency_formatter.dart';
 import 'package:my_budget/src/utils/transactions_page/transaction_amount_widget.dart';
 import 'package:my_budget/src/utils/transactions_page/transaction_icon.dart';
 

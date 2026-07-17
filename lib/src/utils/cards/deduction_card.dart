@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/providers/currency_formatter_provider.dart';
 
-class DeductionCard extends StatelessWidget {
+class DeductionCard extends ConsumerWidget {
   final String title;
   final String frequency;
   final double amount;
@@ -13,7 +15,9 @@ class DeductionCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currency = ref.watch(currencyFormatterProvider);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -47,7 +51,7 @@ class DeductionCard extends StatelessWidget {
           ),
 
           Text(
-            "-MWK ${amount.toInt()}",
+            currency.formatSigned(amount, isIncome: false),
             style: const TextStyle(
               color: Colors.red,
               fontWeight: FontWeight.bold,

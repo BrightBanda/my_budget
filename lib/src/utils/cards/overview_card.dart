@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:my_budget/src/utils/currency_formatter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_budget/src/providers/currency_formatter_provider.dart';
 
-class OverviewCard extends StatelessWidget {
+class OverviewCard extends ConsumerWidget {
   final String title;
   final double value;
   final String subtitle;
@@ -18,7 +19,9 @@ class OverviewCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currency = ref.watch(currencyFormatterProvider);
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -37,7 +40,7 @@ class OverviewCard extends StatelessWidget {
           const Spacer(),
 
           Text(
-            value.mwk,
+            currency.format(value),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,

@@ -19,14 +19,6 @@ class TransactionsNotifier extends AsyncNotifier<List<BudgetTransaction>> {
     refreshTransactions();
   }
 
-  Future<void> addTransactions(List<BudgetTransaction> transactions) async {
-    if (transactions.isEmpty) return;
-
-    await _db.insertTransactions(transactions);
-
-    await refreshTransactions();
-  }
-
   Future<void> deleteTransaction(String id) async {
     await _db.deleteTransaction(id);
     refreshTransactions();

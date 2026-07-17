@@ -1,5 +1,6 @@
 package com.example.my_budget
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
@@ -12,8 +13,9 @@ import io.flutter.plugin.common.MethodChannel
 /**
  * The Kotlin -> Dart bridge for auto-captured transactions.
  *
- * - Method channel: Dart pulls the pending queue and inspects/requests the listener permission.
- * - Event channel: a payload-free ping telling Dart "something new landed, drain now".
+ * A tapped notification hands its transaction JSON to [deliverTap]. Dart pulls it with
+ * the `consumePrefill` method call — on startup, on resume, and whenever the event
+ * channel pings that a fresh tap arrived while the app was already open.
  */
 object TransactionChannel {
 
@@ -23,10 +25,16 @@ object TransactionChannel {
     private var eventSink: EventChannel.EventSink? = null
     private val mainHandler = Handler(Looper.getMainLooper())
 
+    /** The most recent tapped transaction awaiting pickup by Dart. */
+    private var pendingTapJson: String? = null
+
     fun register(engine: FlutterEngine, context: Context) {
         MethodChannel(engine.dartExecutor.binaryMessenger, METHOD_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
-                "drainPending" -> result.success(PendingTransactionStore.drain(context))
+                "consumePrefill" -> {
+                    result.success(pendingTapJson)
+                    pendingTapJson = null
+                }
                 "isListenerEnabled" -> result.success(isListenerEnabled(context))
                 "openListenerSettings" -> {
                     openListenerSettings(context)
@@ -49,8 +57,18 @@ object TransactionChannel {
         )
     }
 
-    /** Nudges Dart to drain. No-op when the engine isn't running — the queue keeps the detection. */
-    fun notifyPending() {
+    /**
+     * Holds a tapped transaction for Dart and nudges a running app to pull it. When the
+     * app is cold-starting the ping is dropped, but Dart still reads [pendingTapJson] on
+     * startup — so nothing is lost.
+     */
+    fun deliverTap(context: Context, json: String, notificationId: Int) {
+        pendingTapJson = json
+
+        if (notificationId > 0) {
+            context.getSystemService(NotificationManager::class.java)?.cancel(notificationId)
+        }
+
         mainHandler.post { eventSink?.success(true) }
     }
 

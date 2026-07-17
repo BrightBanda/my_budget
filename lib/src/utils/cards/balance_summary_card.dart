@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_budget/src/providers/analytics/total_monthly_expense_provider.dart';
 import 'package:my_budget/src/providers/analytics/total_monthly_income_provider.dart';
-import 'package:my_budget/src/utils/currency_formatter.dart';
+import 'package:my_budget/src/providers/currency_formatter_provider.dart';
 
 class BalanceCard extends ConsumerWidget {
   final String balance;
@@ -10,6 +10,8 @@ class BalanceCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currency = ref.watch(currencyFormatterProvider);
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -52,12 +54,12 @@ class BalanceCard extends ConsumerWidget {
               _statItem(
                 Icon(Icons.trending_up, color: Colors.white),
                 "Monthly Income",
-                ref.watch(monthlyIncomeProvider).mwk,
+                currency.format(ref.watch(monthlyIncomeProvider)),
               ),
               _statItem(
                 Icon(Icons.trending_down, color: Colors.white),
                 "Monthly Expenses",
-                ref.watch(monthlyExpenseProvider).mwk,
+                currency.format(ref.watch(monthlyExpenseProvider)),
               ),
             ],
           ),
